@@ -24,7 +24,7 @@ import { MalformedUrlMiddleware } from "./common/middleware/malformed-url.middle
 // ====  healthcheck Controller====
 import { Controller, Get } from "@nestjs/common";
 
-@Controller()
+@Controller("api")
 export class HealthController {
   @Get("health")
   health() {
