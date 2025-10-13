@@ -5,13 +5,14 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-"scripts": {
-  "prebuild": "rimraf dist",
-  "build": "nest build",
-  "start": "nest start",
-  "start:prod": "node dist/main",
-  "dev": "nest start --watch"
-},
+  "scripts": {
+    "vercel-postinstall": "npm run typeorm migration:run",
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "start": "nest start",
+    "start:prod": "node dist/main",
+    "dev": "nest start --watch"
+  },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/common": "^10.0.0",
