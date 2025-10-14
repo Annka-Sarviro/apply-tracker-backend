@@ -57,7 +57,7 @@ export class HealthController {
         transport: {
           host: configService.get<string>("SMTP_HOST"),
           port: configService.get<number>("SMTP_PORT"),
-          secure: true,
+          secure: false,
           auth: {
             user: configService.get<string>("SMTP_USER"),
             pass: configService.get<string>("SMTP_PASSWORD"),
