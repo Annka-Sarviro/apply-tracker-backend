@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 import {
   Entity,
   Column,
@@ -6,36 +6,41 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+  JoinColumn,
+} from "typeorm";
+import { User } from "../../user/entities/user.entity";
 
-@Entity({ name: 'Event' })
+@Entity({ name: "Event" })
 export class Event {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ApiProperty({ description: 'Event name' })
-  @Column()
+  @ApiProperty({ description: "Event name" })
+  @Column({ type: "varchar" })
   name: string;
 
-  @ApiProperty({ description: 'Event text content' })
-  @Column({ type: 'text', nullable: true })
-  text: string;
+  @ApiProperty({ description: "Event text content" })
+  @Column({ type: "text", nullable: true })
+  text?: string;
 
-  @ApiProperty({ description: 'Event date' })
-  @Column({ type: 'date' })
+  @ApiProperty({ description: "Event date" })
+  @Column({ type: "date" })
   date: Date;
 
-  @ApiProperty({ description: 'Event time' })
-  @Column({ type: 'time' })
+  @ApiProperty({ description: "Event time" })
+  @Column({ type: "time" })
   time: string;
 
-  @ManyToOne(() => User, (user) => user.events, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.events, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
   user?: User;
 
-  @CreateDateColumn()
+  @Column({ type: "uuid", nullable: true })
+  userId?: string;
+
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp with time zone" })
   updatedAt: Date;
 }

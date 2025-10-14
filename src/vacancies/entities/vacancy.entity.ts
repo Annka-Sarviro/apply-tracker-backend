@@ -6,55 +6,55 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { VacancyStatus } from '../../vacancy-status/entities/vacancy-status.entity';
+} from "typeorm";
+import { User } from "../../user/entities/user.entity";
+import { VacancyStatus } from "../../vacancy-status/entities/vacancy-status.entity";
 
 export enum WorkType {
-  REMOTE = 'remote',
-  OFFICE = 'office',
-  HYBRID = 'hybrid',
+  REMOTE = "remote",
+  OFFICE = "office",
+  HYBRID = "hybrid",
 }
 
-@Entity({ name: 'Vacancies' })
+@Entity({ name: "Vacancies" })
 export class Vacancy {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   vacancy: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   link: string;
 
-  @Column({ nullable: true })
-  communication: string;
+  @Column({ type: "varchar", nullable: true })
+  communication?: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   company: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   location: string;
 
-  @Column({ type: 'enum', enum: WorkType })
+  @Column({ type: "enum", enum: WorkType })
   work_type: WorkType;
 
-  @Column({ nullable: true })
-  note: string;
+  @Column({ type: "text", nullable: true })
+  note?: string;
 
-  @Column({ default: false })
+  @Column({ type: "boolean", default: false })
   isArchived: boolean;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn()
   user: User;
 
   @OneToMany(() => VacancyStatus, (status) => status.vacancy)
   statuses: VacancyStatus[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp with time zone" })
   updatedAt: Date;
 }

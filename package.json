@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "vercel-postinstall": "npm run typeorm migration:run",
+    "vercel-build": "nest build && node copy-data.js",
+    "vercel-postbuild": "npx tsx node_modules/typeorm/cli.js migration:run -d ./dist/data-source.js",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "nest start",

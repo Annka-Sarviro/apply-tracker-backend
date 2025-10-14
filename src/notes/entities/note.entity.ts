@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 import {
   Entity,
   Column,
@@ -6,28 +6,33 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+  JoinColumn,
+} from "typeorm";
+import { User } from "../../user/entities/user.entity";
 
-@Entity({ name: 'Note' })
+@Entity({ name: "Note" })
 export class Note {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ApiProperty({ description: 'Note name' })
-  @Column()
+  @ApiProperty({ description: "Note name" })
+  @Column({ type: "varchar" })
   name: string;
 
-  @ApiProperty({ description: 'Note text content' })
-  @Column({ type: 'text', nullable: true })
-  text: string;
+  @ApiProperty({ description: "Note text content" })
+  @Column({ type: "text", nullable: true })
+  text?: string;
 
-  @ManyToOne(() => User, (user) => user.notes, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.notes, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
   user?: User;
 
-  @CreateDateColumn()
+  @Column({ type: "uuid", nullable: true })
+  userId?: string;
+
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp with time zone" })
   updatedAt: Date;
 }

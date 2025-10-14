@@ -6,36 +6,36 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+} from "typeorm";
+import { User } from "../../user/entities/user.entity";
 
-@Entity({ name: 'Projects' })
+@Entity({ name: "Projects" })
 export class Project {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name: string;
 
-  @Column({ nullable: true })
-  technologies: string;
+  @Column({ type: "varchar", nullable: true })
+  technologies?: string;
 
-  @Column({ nullable: true })
-  description: string;
+  @Column({ type: "text", nullable: true })
+  description?: string;
 
-  @Column({ nullable: true })
-  link: string;
+  @Column({ type: "varchar", nullable: true })
+  link?: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp with time zone" })
   updatedAt: Date;
 
-  @Column()
+  @Column({ type: "uuid" })
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.projects, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.projects, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "userId" })
   user?: User;
 }
