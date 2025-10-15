@@ -138,10 +138,6 @@ export class NotesService {
         throw new NotFoundException("Note not found");
       }
 
-      if (note.user.id !== userId) {
-        throw new ForbiddenException("You can only delete your own notes");
-      }
-
       await this.noteRepository.remove(note);
       return { message: "Note successfully deleted" };
     } catch (error) {
