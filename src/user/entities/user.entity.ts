@@ -13,6 +13,7 @@ import { Project } from "../../projects/entities/project.entity";
 import { Note } from "../../notes/entities/note.entity";
 import { Event } from "../../events/entities/event.entity";
 import { Prediction } from "../../predictions/entities/prediction.entity";
+import { Support } from "src/supports/entities/support.entity";
 
 @Entity({ name: "User" })
 export class User {
@@ -71,6 +72,12 @@ export class User {
   @ApiProperty({ type: () => [Note], description: "User notes" })
   @OneToMany(() => Note, (note) => note.user, { cascade: true })
   notes?: Note[];
+
+  @ApiProperty({ type: () => [Support], description: "User support" })
+  @OneToMany(() => Support, (support) => support.user, {
+    cascade: true,
+  })
+  supports: Support[];
 
   @ApiProperty({ type: () => [Event], description: "User events" })
   @OneToMany(() => Event, (event) => event.user, { cascade: true })

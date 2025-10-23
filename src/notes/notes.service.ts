@@ -45,7 +45,7 @@ export class NotesService {
     try {
       const notes = await this.noteRepository.find({
         where: { userId },
-        order: { createdAt: "DESC" },
+        order: { updatedAt: "DESC" },
         select: ["id", "name", "text", "createdAt", "updatedAt"],
       });
       return notes;

@@ -1,24 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { MailerService } from "@nestjs-modules/mailer";
 
 type MailOptions = {
   subject: string;
   email: string;
   name: string;
-  link: string;
+  link?: string;
   template: string;
-}
+  text?: string;
+};
 
 @Injectable()
 export class MailingService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly mailerService: MailerService,
-  ) { }
+    private readonly mailerService: MailerService
+  ) {}
 
-  async sendMail({ email, name, subject, template, link, }: MailOptions) {
-
+  async sendMail({ email, name, subject, template, link, text }: MailOptions) {
     await this.mailerService.sendMail({
       to: email,
       subject,
@@ -26,8 +26,8 @@ export class MailingService {
       context: {
         name,
         link,
+        text,
       },
     });
   }
-
 }

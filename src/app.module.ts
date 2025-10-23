@@ -23,6 +23,7 @@ import { MalformedUrlMiddleware } from "./common/middleware/malformed-url.middle
 
 // ====  healthcheck Controller====
 import { Controller, Get } from "@nestjs/common";
+import { SupportsModule } from "./supports/supports.module";
 
 @Controller("api")
 export class HealthController {
@@ -95,6 +96,7 @@ export class HealthController {
     NotesModule,
     EventsModule,
     PredictionsModule,
+    SupportsModule,
   ],
   controllers: [HealthController],
 })
