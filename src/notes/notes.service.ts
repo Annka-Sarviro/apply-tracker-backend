@@ -45,7 +45,7 @@ export class NotesService {
     try {
       const notes = await this.noteRepository.find({
         where: { userId },
-        order: { createdAt: "DESC" },
+        order: { updatedAt: "DESC" },
         select: ["id", "name", "text", "createdAt", "updatedAt"],
       });
       return notes;
@@ -136,10 +136,6 @@ export class NotesService {
 
       if (!note) {
         throw new NotFoundException("Note not found");
-      }
-
-      if (note.user.id !== userId) {
-        throw new ForbiddenException("You can only delete your own notes");
       }
 
       await this.noteRepository.remove(note);
