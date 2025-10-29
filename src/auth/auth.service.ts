@@ -1,18 +1,25 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import * as argon2 from 'argon2';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import * as argon2 from "argon2";
+import { v4 as uuidv4 } from "uuid";
 
-import { UserService } from '../user/user.service';
-import { User } from '../user/entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { MailingService } from '../mailing/mailing.service';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UserService } from "../user/user.service";
+import { User } from "../user/entities/user.entity";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { LoginUserDto } from "./dto/login-user.dto";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { MailingService } from "../mailing/mailing.service";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -23,11 +30,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailingService: MailingService
-  ) { }
+  ) {}
 
   async register(createUserDto: CreateUserDto) {
     if (!createUserDto.email || !createUserDto.password) {
-      throw new BadRequestException('Email and password are required');
+      throw new BadRequestException("Email and password are required");
     }
 
     try {
@@ -38,7 +45,7 @@ export class AuthService {
       });
 
       if (existingUser) {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException("User with this email already exists");
       }
 
       const user = await this.userRepository.save({
@@ -48,25 +55,25 @@ export class AuthService {
         socials: [
           {
             id: uuidv4(),
-            name: 'Telegram',
-            link: ''
+            name: "Telegram",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'GitHub',
-            link: ''
+            name: "GitHub",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'LinkedIn',
-            link: ''
+            name: "LinkedIn",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'Behance',
-            link: ''
-          }
-        ]
+            name: "Behance",
+            link: "",
+          },
+        ],
       });
 
       return this.generateTokens(user);
@@ -75,22 +82,22 @@ export class AuthService {
         throw error;
       }
       throw new HttpException(
-        'Failed to register user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to register user",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   async login(loginUserDto: LoginUserDto, req: any) {
     if (!loginUserDto.email || !loginUserDto.password) {
-      throw new BadRequestException('Email and password are required');
+      throw new BadRequestException("Email and password are required");
     }
 
     try {
       const user = await this.userService.findOne(loginUserDto.email);
 
       if (!user) {
-        throw new UnauthorizedException('Invalid login credentials');
+        throw new UnauthorizedException("Invalid login credentials");
       }
 
       const isPasswordsMatch = await argon2.verify(
@@ -99,12 +106,12 @@ export class AuthService {
       );
 
       if (!isPasswordsMatch) {
-        throw new UnauthorizedException('Invalid login credentials');
+        throw new UnauthorizedException("Invalid login credentials");
       }
 
       // Get the user with their current invalidated tokens
       const userWithTokens = await this.userRepository.findOne({
-        where: { id: user.id }
+        where: { id: user.id },
       });
 
       // Get current token if it exists in the request
@@ -120,7 +127,7 @@ export class AuthService {
 
       // Update user with the new invalidated tokens list
       await this.userRepository.update(user.id, {
-        invalidatedTokens
+        invalidatedTokens,
       });
 
       // Generate new tokens
@@ -132,29 +139,29 @@ export class AuthService {
         throw error;
       }
       throw new HttpException(
-        'Failed to login',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to login",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   async logout(req: any) {
     if (!req?.user) {
-      throw new UnauthorizedException('User not authenticated');
+      throw new UnauthorizedException("User not authenticated");
     }
 
     try {
       const token = this.extractTokenFromHeader(req);
       if (!token) {
-        throw new UnauthorizedException('No token provided');
+        throw new UnauthorizedException("No token provided");
       }
 
       const user = await this.userRepository.findOne({
-        where: { email: req.user.email }
+        where: { email: req.user.email },
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException("User not found");
       }
 
       // Add token to invalidated tokens list
@@ -163,46 +170,46 @@ export class AuthService {
 
       // Update user with new invalidated token
       await this.userRepository.update(user.id, {
-        invalidatedTokens
+        invalidatedTokens,
       });
 
       return {
-        message: 'User successfully logged out',
-        status: HttpStatus.OK
+        message: "User successfully logged out",
+        status: HttpStatus.OK,
       };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       throw new HttpException(
-        'Failed to logout',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to logout",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [type, token] = request.headers.authorization?.split(" ") ?? [];
+    return type === "Bearer" ? token : undefined;
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     if (!forgotPasswordDto.email) {
-      throw new BadRequestException('Email is required');
+      throw new BadRequestException("Email is required");
     }
 
     try {
       const user = await this.userService.findOne(forgotPasswordDto.email);
 
       if (!user) {
-        throw new UnauthorizedException('User with this email does not exist');
+        throw new UnauthorizedException("User with this email does not exist");
       }
 
       const token = this.jwtService.sign(
         { email: user.email },
         {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: '10m',
+          secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
+          expiresIn: "10m",
         }
       );
 
@@ -215,55 +222,57 @@ export class AuthService {
         resetTokenExpiry: expiry,
       });
 
-      const resetPasswordUrl = this.configService.get<string>('CLIENT_URL') + `/reset-password?verify=${token}`;
+      const resetPasswordUrl =
+        this.configService.get<string>("CLIENT_URL") +
+        `/reset-password?verify=${token}`;
 
       await this.mailingService.sendMail({
         email: user.email,
         name: user.username,
-        subject: 'Password reset',
-        template: 'forgot-password',
+        subject: "Password reset",
+        template: "forgot-password",
         link: resetPasswordUrl,
       });
 
       return {
-        message: 'Password reset instructions have been sent to your email',
+        message: "Password reset instructions have been sent to your email",
         status: HttpStatus.OK,
-        token
+        token,
       };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       throw new HttpException(
-        'Failed to process password reset request',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to process password reset request",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     if (!resetPasswordDto.token || !resetPasswordDto.password) {
-      throw new BadRequestException('Token and new password are required');
+      throw new BadRequestException("Token and new password are required");
     }
 
     let decodedToken;
     try {
       decodedToken = this.jwtService.verify(resetPasswordDto.token, {
-        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
       });
     } catch (error) {
-      if (error?.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Reset token has expired');
+      if (error?.name === "TokenExpiredError") {
+        throw new UnauthorizedException("Reset token has expired");
       }
-      if (error?.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid reset token');
+      if (error?.name === "JsonWebTokenError") {
+        throw new UnauthorizedException("Invalid reset token");
       }
       throw error;
     }
 
     try {
       if (!decodedToken) {
-        throw new UnauthorizedException('Invalid or expired reset token');
+        throw new UnauthorizedException("Invalid or expired reset token");
       }
 
       // Find user and check if token matches and hasn't expired
@@ -271,16 +280,16 @@ export class AuthService {
         where: {
           email: decodedToken.email,
           resetToken: resetPasswordDto.token,
-        }
+        },
       });
 
       if (!user) {
-        throw new UnauthorizedException('Invalid or expired reset token');
+        throw new UnauthorizedException("Invalid or expired reset token");
       }
 
       // Check if token has expired
       if (!user.resetTokenExpiry || new Date() > user.resetTokenExpiry) {
-        throw new UnauthorizedException('Reset token has expired');
+        throw new UnauthorizedException("Reset token has expired");
       }
 
       const hashedPassword = await argon2.hash(resetPasswordDto.password);
@@ -289,59 +298,69 @@ export class AuthService {
       await this.userRepository.update(user.id, {
         password: hashedPassword,
         resetToken: null,
-        resetTokenExpiry: null
+        resetTokenExpiry: null,
       });
 
       return {
-        message: 'Password has been successfully reset',
-        status: HttpStatus.OK
+        message: "Password has been successfully reset",
+        status: HttpStatus.OK,
       };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       throw new HttpException(
-        'Failed to reset password',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to reset password",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   async googleLogin(req: any) {
     if (!req.user) {
-      return 'No user from Google';
+      return "No user from Google";
     }
-
-    let user = await this.userRepository.findOne({ where: { email: req.user.email } });
+    const { email, firstName, lastName, picture } = req.user;
+    let user = await this.userRepository.findOne({
+      where: { email: req.user.email },
+    });
 
     if (!user) {
+      const buildUsername = () => {
+        const parts = [firstName, lastName].filter(Boolean).join(" ").trim();
+        if (parts) return parts;
+
+        const emailBase = email?.split("@")[0];
+        return emailBase || `user_${Date.now()}`;
+      };
+
       user = await this.userRepository.save({
         id: uuidv4(),
         email: req.user.email,
-        username: `${req.user.firstName} ${req.user.lastName}`,
+        username: buildUsername(),
         avatar: req.user.picture,
         socials: [
           {
             id: uuidv4(),
-            name: 'Telegram',
-            link: ''
+            name: "Telegram",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'GitHub',
-            link: ''
+            name: "GitHub",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'LinkedIn',
-            link: ''
+            name: "LinkedIn",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'Behance',
-            link: ''
-          }
-        ]
+            name: "Behance",
+            link: "",
+          },
+        ],
       });
     }
 
@@ -350,10 +369,12 @@ export class AuthService {
 
   async githubLogin(req: any) {
     if (!req.user) {
-      return 'No user from GitHub';
+      return "No user from GitHub";
     }
 
-    let user = await this.userRepository.findOne({ where: { email: req.user.email } });
+    let user = await this.userRepository.findOne({
+      where: { email: req.user.email },
+    });
 
     if (!user) {
       user = await this.userRepository.save({
@@ -363,25 +384,25 @@ export class AuthService {
         socials: [
           {
             id: uuidv4(),
-            name: 'Telegram',
-            link: ''
+            name: "Telegram",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'GitHub',
-            link: ''
+            name: "GitHub",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'LinkedIn',
-            link: ''
+            name: "LinkedIn",
+            link: "",
           },
           {
             id: uuidv4(),
-            name: 'Behance',
-            link: ''
-          }
-        ]
+            name: "Behance",
+            link: "",
+          },
+        ],
       });
     }
 
@@ -391,21 +412,26 @@ export class AuthService {
   async refreshTokens(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
       });
 
-      const user = await this.userRepository.findOne({ where: { id: payload.sub } });
+      const user = await this.userRepository.findOne({
+        where: { id: payload.sub },
+      });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException("User not found");
       }
-      const access_token = (await this.generateTokens(user)).access_token
-      return { access_token }
+      const access_token = (await this.generateTokens(user)).access_token;
+      return { access_token };
     } catch (error) {
-      if (error?.name === 'TokenExpiredError' || error?.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid or expired refresh token');
+      if (
+        error?.name === "TokenExpiredError" ||
+        error?.name === "JsonWebTokenError"
+      ) {
+        throw new UnauthorizedException("Invalid or expired refresh token");
       }
-      throw new UnauthorizedException('Failed to refresh tokens');
+      throw new UnauthorizedException("Failed to refresh tokens");
     }
   }
 
@@ -415,12 +441,12 @@ export class AuthService {
       const payload = {
         email: user.email,
         sub: user.id,
-        jti: tokenJti // Add unique token ID to payload
+        jti: tokenJti, // Add unique token ID to payload
       };
 
       // Get user's current tokens
       const currentUser = await this.userRepository.findOne({
-        where: { id: user.id }
+        where: { id: user.id },
       });
 
       // Initialize or get the invalidated tokens array
@@ -429,27 +455,26 @@ export class AuthService {
       // Generate new tokens
       const tokens = {
         access_token: this.jwtService.sign(payload, {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: '15m', // 15 minutes
+          secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
+          expiresIn: "15m", // 15 minutes
         }),
         refresh_token: this.jwtService.sign(payload, {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: '7d', // 7 days
+          secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
+          expiresIn: "7d", // 7 days
         }),
       };
 
       // Update user's invalidated tokens
       await this.userRepository.update(user.id, {
-        invalidatedTokens: invalidatedTokens
+        invalidatedTokens: invalidatedTokens,
       });
 
       return tokens;
     } catch (error) {
       throw new HttpException(
-        'Failed to generate tokens',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to generate tokens",
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
-
 }
